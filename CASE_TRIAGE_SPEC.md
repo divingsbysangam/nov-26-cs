@@ -2,8 +2,6 @@
 
 **Status:** Initial implementation brief  
 **Workshop:** ClaudeForce, Nov 26, 2026  
-**Linear project:** [Nov 26 CS](https://linear.app/divings/project/nov-26-cs-80d85a67d354)  
-**Linear Epic:** [DIV-72: Automatic Jev Case Triage and Salesforce Actions](https://linear.app/divings/issue/DIV-72/epic-automatic-jev-case-triage-and-salesforce-actions)
 
 ## Goal
 
@@ -127,15 +125,6 @@ Apex tests should use `HttpCalloutMock` and test dispatch/worker behavior withou
 - Bulk, idempotency, recursion, security, and failure-path tests pass.
 - The labeled evaluation set supports the chosen thresholds and documents known limitations.
 - The package is installed/configured and verified in the Nov 26 demo org using synthetic data, with a runbook and service-unavailable fallback.
-
-## Related Linear Issues
-
-- [DIV-78: Define Case triage taxonomy and Jev evaluation set](https://linear.app/divings/issue/DIV-78/define-case-triage-taxonomy-and-jev-evaluation-set)
-- [DIV-75: Add Case triage fields and routing configuration](https://linear.app/divings/issue/DIV-75/add-case-triage-fields-and-routing-configuration)
-- [DIV-73: Implement secure Apex client for TypeSafe Jev](https://linear.app/divings/issue/DIV-73/implement-secure-apex-client-for-typesafe-jev)
-- [DIV-74: Trigger bulk-safe asynchronous triage on Case creation](https://linear.app/divings/issue/DIV-74/trigger-bulk-safe-asynchronous-triage-on-case-creation)
-- [DIV-77: Apply Jev decisions with Salesforce routing and review fallbacks](https://linear.app/divings/issue/DIV-77/apply-jev-decisions-with-salesforce-routing-and-review-fallbacks)
-- [DIV-76: Evaluate and package Case triage for the Nov 26 demo org](https://linear.app/divings/issue/DIV-76/evaluate-and-package-case-triage-for-the-nov-26-demo-org)
 
 ## References
 
