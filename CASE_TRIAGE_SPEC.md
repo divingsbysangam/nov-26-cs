@@ -40,9 +40,9 @@ Do not ask Jev to generate a narrative summary, customer response, Salesforce re
 2. A post-commit asynchronous worker processes each Case. The Case insert transaction must not wait on Jev and must succeed if Jev is unavailable.
 3. The worker reloads the required Case fields and sends only the minimum context needed for classification. Avoid sending Salesforce IDs, unrelated record data, attachments, or personal/sensitive data unless explicitly approved.
 4. One Jev System One request asks several narrow questions: a `Choice` for category, a `Score` for impact, and a companion `Noul` for whether any supported category applies.
-5. Salesforce validates the HTTP status, response structure, expected question IDs and types, allowed values, and numeric probability ranges. A Choice always selects one option, so never use it without checking the companion no-match question.
-6. Salesforce applies versioned/configurable thresholds. A supported, sufficiently certain result maps to allowed Case fields and a configured queue. Uncertainty, no-match, security/privacy signals, invalid responses, and exhausted retries go to human review.
-7. Salesforce updates triage status and assignment. That update must not retrigger a second triage run.
+5. Salesforce validates HTTP status, response structure, expected question IDs/types, allowed values, and numeric probability ranges. A Choice always selects one option, so never use it without the companion no-match question.
+6. Salesforce applies versioned/configurable thresholds. A supported, sufficiently certain result maps to approved Case fields and a configured queue. Uncertainty, no-match, security/privacy signals, invalid responses, and exhausted retries go to human review.
+7. Salesforce updates triage status and assignment. That update must not retrigger triage.
 
 ### Asynchronous architecture to validate
 
@@ -85,7 +85,7 @@ The implementation must define and document:
 - A human-review queue and review reason for low certainty, unsupported category, security/privacy concerns, malformed response, and final service failure.
 - Whether a Case with missing subject/description is sent to review without a Jev call.
 
-Never overwrite a non-empty human-entered value unless the business owner explicitly approves that behavior. Preserve the selected option and relevant probability/triage metadata needed to explain an automated route, without storing unnecessary customer text.
+Never overwrite a non-empty human-entered value unless the business owner explicitly approves it. Preserve the selected option and relevant probability/triage metadata needed to explain an automated route, without storing unnecessary customer text.
 
 ### Reliability, security, and privacy
 
@@ -132,7 +132,7 @@ Expected behavior after the fix:
 - The customer Account is created successfully.
 - The specified support user receives the configured permission set.
 - If permission assignment becomes asynchronous, the completion semantics are clear and any failure is observable and retryable rather than silently ignored.
-- Duplicate requests do not create duplicate Accounts or assignments.
+- The exercise is scoped to one valid onboarding request; repeated-request idempotency is outside this challenge.
 - Tests cover successful outcomes and invalid user/permission or assignment failure paths.
 
 ### Starter files
