@@ -4,7 +4,49 @@
 **Purpose:** Give developers two practical exercises: build a Jev-powered Case triage workflow, then diagnose and fix a seeded Mixed DML failure.  
 **Implementation boundary:** Build and validate in the separate implementation org/repository using Claude Code, then package and configure the demo org. This repository is a workshop starter, not the implementation org. Use synthetic data only.
 
-## Use Case 1: Automatic Jev Case Triage
+## Use Case 1: Diagnose And Fix A Mixed DML Failure
+
+### Scenario
+
+The starter Apex service simulates support-account onboarding. It creates a customer `Account` and assigns the `Support_Account_Triage_Access` permission set to an existing internal support user in the same transaction. `Account` is a business object; `PermissionSetAssignment` is a setup object. Salesforce rejects the mixed transaction with `MIXED_DML_OPERATION`, so onboarding fails.
+
+The starter includes a regression test that exercises the failing path. The code is intentionally defective. Do not deploy it to a shared or production org.
+
+### Participant challenge
+
+Give an AI coding agent the debugging issue, ask it to inspect the repository, reproduce and explain the failure, propose a safe transaction design, then implement the fix with tests. The issue deliberately describes the observed failure and desired behavior without prescribing the solution.
+
+Expected behavior after the fix:
+- The customer Account is created successfully.
+- The specified support user receives the configured permission set.
+- If permission assignment becomes asynchronous, the completion semantics are clear and any failure is observable and retryable rather than silently ignored.
+- The exercise is scoped to one valid onboarding request; repeated-request idempotency is outside this challenge.
+- Tests cover successful outcomes and invalid user/permission or assignment failure paths.
+
+### Starter files
+
+- `force-app/main/default/classes/SupportAccountOnboarding.cls`: intentionally performs Account DML and PermissionSetAssignment DML in one transaction.
+- `force-app/main/default/classes/SupportAccountOnboardingTest.cls`: regression test expected to expose the failure before the fix.
+- `force-app/main/default/classes/TestDataFactory.cls`: isolated test user factory.
+- `force-app/main/default/permissionsets/Support_Account_Triage_Access.permissionset-meta.xml`: permission set referenced by the sample service.
+
+The learner should not edit the first use case to solve this independent debugging exercise. The challenge uses synthetic data and does not call Jev.
+
+### Test caveat
+
+Salesforce permits mixed DML in certain test-only contexts when the DML is wrapped in `System.runAs`. The regression test intentionally calls the flawed service outside `System.runAs`; keep it that way so the test exposes the same transaction constraint. Salesforce also documents differences in Mixed DML validation during deployment, so run the test in the target test org rather than treating a deploy-validation result as proof that the defect is absent.
+
+## Definition Of Done
+
+- Case creation automatically starts post-commit asynchronous Jev triage; there is no button or manual invocation.
+- Case creation remains successful and responsive when Jev is slow or unavailable.
+- Salesforce applies only validated, threshold-approved recommendations; other cases have a visible human-review path.
+- Bulk, idempotency, recursion, security, and failure-path tests are specified and pass in the authorized implementation org.
+- The labeled Jev evaluation set supports the chosen thresholds and documents limitations.
+- The Mixed DML exercise starts with an Apex test that demonstrates the defect; after the learner's fix, Account creation and access assignment both complete and regression tests pass.
+- The demo org uses synthetic data and has a runbook and service-unavailable fallback.
+ 
+## Use Case 2: Automatic Jev Case Triage
 
 ### Goal
 
@@ -115,48 +157,6 @@ Required scenarios:
 11. Replaying a successful or failed job is idempotent and does not duplicate actions.
 
 Apex tests should use `HttpCalloutMock` and test dispatch/worker behavior without a real TypeSafe key. Include an authorized-org integration test for Named Credential setup and end-to-end behavior in the demo org.
-
-## Use Case 2: Diagnose And Fix A Mixed DML Failure
-
-### Scenario
-
-The starter Apex service simulates support-account onboarding. It creates a customer `Account` and assigns the `Support_Account_Triage_Access` permission set to an existing internal support user in the same transaction. `Account` is a business object; `PermissionSetAssignment` is a setup object. Salesforce rejects the mixed transaction with `MIXED_DML_OPERATION`, so onboarding fails.
-
-The starter includes a regression test that exercises the failing path. The code is intentionally defective. Do not deploy it to a shared or production org.
-
-### Participant challenge
-
-Give an AI coding agent the debugging issue, ask it to inspect the repository, reproduce and explain the failure, propose a safe transaction design, then implement the fix with tests. The issue deliberately describes the observed failure and desired behavior without prescribing the solution.
-
-Expected behavior after the fix:
-- The customer Account is created successfully.
-- The specified support user receives the configured permission set.
-- If permission assignment becomes asynchronous, the completion semantics are clear and any failure is observable and retryable rather than silently ignored.
-- The exercise is scoped to one valid onboarding request; repeated-request idempotency is outside this challenge.
-- Tests cover successful outcomes and invalid user/permission or assignment failure paths.
-
-### Starter files
-
-- `force-app/main/default/classes/SupportAccountOnboarding.cls`: intentionally performs Account DML and PermissionSetAssignment DML in one transaction.
-- `force-app/main/default/classes/SupportAccountOnboardingTest.cls`: regression test expected to expose the failure before the fix.
-- `force-app/main/default/classes/TestDataFactory.cls`: isolated test user factory.
-- `force-app/main/default/permissionsets/Support_Account_Triage_Access.permissionset-meta.xml`: permission set referenced by the sample service.
-
-The learner should not edit the first use case to solve this independent debugging exercise. The challenge uses synthetic data and does not call Jev.
-
-### Test caveat
-
-Salesforce permits mixed DML in certain test-only contexts when the DML is wrapped in `System.runAs`. The regression test intentionally calls the flawed service outside `System.runAs`; keep it that way so the test exposes the same transaction constraint. Salesforce also documents differences in Mixed DML validation during deployment, so run the test in the target test org rather than treating a deploy-validation result as proof that the defect is absent.
-
-## Definition Of Done
-
-- Case creation automatically starts post-commit asynchronous Jev triage; there is no button or manual invocation.
-- Case creation remains successful and responsive when Jev is slow or unavailable.
-- Salesforce applies only validated, threshold-approved recommendations; other cases have a visible human-review path.
-- Bulk, idempotency, recursion, security, and failure-path tests are specified and pass in the authorized implementation org.
-- The labeled Jev evaluation set supports the chosen thresholds and documents limitations.
-- The Mixed DML exercise starts with an Apex test that demonstrates the defect; after the learner's fix, Account creation and access assignment both complete and regression tests pass.
-- The demo org uses synthetic data and has a runbook and service-unavailable fallback.
 
 ## References
 
